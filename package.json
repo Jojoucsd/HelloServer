@@ -1,0 +1,9 @@
+{
+	"name": "HelloServer",
+	"description": "My first Server",
+	"author": "Ling Lu",
+	"dependencies": {
+		"mongoose": ">= 3.8.0"
+	},
+	"engine": "node 0.10.33"
+}
