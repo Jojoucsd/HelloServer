@@ -4,13 +4,6 @@ var fs = require('fs');
 
 // connecting to mongodb
 mongoose.connect ('mongodb://localhost/my_database');
-var Cat = mongoose.model('Cat', { name: String });
-
-var kitty = new Cat({ name: 'Zildjian' });
-kitty.save(function (err) {
-  if (err) return console.error(err);
-  console.log('meow');
-});
 
 // making http server
 http.createServer(function (req, res) {
