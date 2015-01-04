@@ -43,6 +43,17 @@ function requestHandler(req, res) {
 			res.write(data);
 			res.end();
 		});
+	} else if (req.url === "/panels.html") {
+		fs.readFile("panels.html", {
+			encoding: "utf8"
+		}, function(err, data) {
+			res.writeHead(200, {
+				'Content-Type': 'text/html'
+			});
+			if (err) throw err;
+			res.write(data);
+			res.end();
+		});
 	} else if (req.url === "/bootstrap.js") {
 		fs.readFile("bootstrap.js", {
 			endcoding: "utf8"
@@ -62,7 +73,7 @@ function requestHandler(req, res) {
 				'Content-Type': 'text/html'
 			});
 			if (err) throw err;
-			res.write('Email HomePage');
+			res.write('<h1>Email HomePage</h1>');
 			Email.find({
 				name: 'Ling8'
 			}, function(err, found) {
@@ -77,8 +88,7 @@ function requestHandler(req, res) {
 				fs.readFile("indexfooter.html", {
 					endocding: "utf8"
 				}, function(err, data) {
-					res.write('Email HomePage');
-					res.end("Finished my email test");
+					res.end("<h1>Finished my email test</h1>");
 				});
 			});
 		});
