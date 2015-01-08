@@ -66,31 +66,48 @@ function requestHandler(req, res) {
 			res.end();
 		});
 	} else if (req.url === "/index.html") {
-		fs.readFile("indexheader.html", {
+		fs.readFile("Emailvalid.html", {
 			endocding: "utf8"
 		}, function(err, data) {
 			res.writeHead(200, {
 				'Content-Type': 'text/html'
 			});
 			if (err) throw err;
-			res.write('<h1>Email HomePage</h1>');
-			Email.find({
-				name: 'Ling8'
-			}, function(err, found) {
-				if (err) return console.error(err);
-				console.log('err check');
-				if (found) {
-					for (var k = 0; k < found.length; k++) {
-						res.write("<h2>" + "From: " + found[k].from + "</h2>");
-						res.write("<h2>" + "Body: " + found[k].body + "</h2>");
-					}
-				};
-				fs.readFile("indexfooter.html", {
-					endocding: "utf8"
-				}, function(err, data) {
-					res.end("<h1>Finished my email test</h1>");
+			res.write(data);
+			res.end;
+			fs.readFile("indexheader.html", {
+				endocding: "utf8"
+			}, function(err, data) {
+				res.write('<h1>Email HomePage</h1>');
+				Email.find({
+					name: 'Ling8'
+				}, function(err, found) {
+					if (err) return console.error(err);
+					console.log('err check');
+					if (found) {
+						for (var k = 0; k < found.length; k++) {
+							res.write("<h2>" + "From: " + found[k].from + "</h2>");
+							res.write("<h2>" + "Body: " + found[k].body + "</h2>");
+						}
+					};
+					fs.readFile("indexfooter.html", {
+						endocding: "utf8"
+					}, function(err, data) {
+						res.end("<h1>Finished my email test</h1>");
+					});
 				});
 			});
+		});
+	} else if (req.url === "/modal.html") {
+		fs.readFile("modal.html", {
+			endcoding: "utf8"
+		}, function(err, data) {
+			res.writeHead(200, {
+				'Content-Type': 'text/html'
+			});
+			if (err) throw err;
+			res.write(data);
+			res.end();
 		});
 	} else {
 		res.writeHead(404, {
