@@ -43,28 +43,6 @@ function requestHandler(req, res) {
 			res.write(data);
 			res.end();
 		});
-	} else if (req.url === "/panels.html") {
-		fs.readFile("panels.html", {
-			encoding: "utf8"
-		}, function(err, data) {
-			res.writeHead(200, {
-				'Content-Type': 'text/html'
-			});
-			if (err) throw err;
-			res.write(data);
-			res.end();
-		});
-	} else if (req.url === "/bootstrap.js") {
-		fs.readFile("bootstrap.js", {
-			endcoding: "utf8"
-		}, function(err, data) {
-			res.writeHead(200, {
-				'Content-Type': 'text/js'
-			});
-			if (err) throw err;
-			res.write(data);
-			res.end();
-		});
 	} else if (req.url === "/index.html") {
 		fs.readFile("Emailvalid.html", {
 			endocding: "utf8"
@@ -98,9 +76,45 @@ function requestHandler(req, res) {
 				});
 			});
 		});
-	} else if (req.url === "/modal.html") {
-		fs.readFile("modal.html", {
+	} else if (req.url === "/bootstrap.js") {
+		fs.readFile("bootstrap.js", {
 			endcoding: "utf8"
+		}, function(err, data) {
+			res.writeHead(200, {
+				'Content-Type': 'text/js'
+			});
+			if (err) throw err;
+			res.write(data);
+			res.end();
+		});
+	} else
+	if (req.url === "/panels.html") {
+		res.writeHead(404, {
+			'Content-Type': 'text/html'
+		});
+		res.write('<h1>404, webpage not found</h1>');
+		res.end();
+	} else if (req.url === "/action") {
+		req.on('data', function(chunk) {
+			console.log("Received body data:");
+			console.log(chunk.toString());
+			var inputEDB = chunk.toString().match(/Address=(.*)/);
+			console.log(inputEDB);
+			inputEDB.save(function(err){
+			if (err) return console.error(err);
+		});
+		});
+
+		req.on('end', function() {
+			// empty 200 OK response for now
+			res.writeHead(200, "OK", {
+				'Content-Type': 'text/html'
+			});
+			res.end();
+		});
+	} else {
+		fs.readFile("panels.html", {
+			encoding: "utf8"
 		}, function(err, data) {
 			res.writeHead(200, {
 				'Content-Type': 'text/html'
@@ -109,12 +123,6 @@ function requestHandler(req, res) {
 			res.write(data);
 			res.end();
 		});
-	} else {
-		res.writeHead(404, {
-			'Content-Type': 'text/html'
-		});
-		res.write('<h1>404, webpage not found</h1>');
-		res.end();
 	}
 }
 http.createServer(requestHandler).listen(1337, '127.0.0.1');
