@@ -3,13 +3,11 @@ var http = require('http');
 var mongoose = require('mongoose');
 var fs = require('fs');
 
-
 var accountSid = 'AC6c6acb22cb0128a5612d62e81274db63';
 var authToken = '0943d5df024602eb9149009766b7c86f';
 var client = require('twilio')(accountSid, authToken);
 
 mongoose.connect('mongodb://localhost/my_database');
-// local connection 
 
 var lingSchema = new mongoose.Schema({
 	from: String,
@@ -18,10 +16,15 @@ var lingSchema = new mongoose.Schema({
 	title: String,
 	body: String,
 	address: String,
-	comment: [{body: String, date: Date}],
-	date: {type: Date, default: Date.now}
+	comment: [{
+		body: String,
+		date: Date
+	}],
+	date: {
+		type: Date,
+		default: Date.now
+	}
 });
-//schema model setup to name array and varabile
 
 var Email = mongoose.model('Email', lingSchema);
 var emailArray = new Array();
@@ -42,21 +45,62 @@ for (var j = 0; j < 10; j++) {
 	});
 }
 console.log('finished');
-//delcare Email is a schema that can generate data and push in to an array. Also saved in local database
+
 
 function requestHandler(req, res) {
-	if (req.url === "/bootstrap.css") {
-		fs.readFile("bootstrap.css", {
-			encoding: "utf8"
+	var myInput = function(file, code, option) {
+		fs.readFile(file, {
+			endcoding: "utf8"
 		}, function(err, data) {
-			res.writeHead(200, {
-				'Content-Type': 'text/css'
+			res.writeHead(code, {
+				'Content-Type': option
 			});
 			if (err) throw err;
 			res.write(data);
 			res.end();
-			//funciont name is requestHandler does a read file and display 
 		});
+	};
+	var twCall = function(inputNum) {
+		res.writeHead(200, {
+			'Content-Type': 'text/html'
+		});
+		client.calls.create({
+			to: inputNum,
+			from: "+16504379899",
+			url: "http://demo.twilio.com/docs/voice.xml",
+			applicationSid: "APa894ccc18916d5496c35bbe7bd7f07bc",
+			method: "GET",
+			fallbackMethod: "GET",
+			statusCallbackMethod: "GET",
+			record: "false"
+		}, function(err, call) {
+			if (err) return console.error(err);
+			console.log(call.sid);
+			res.write("<h1>" + "Call Section ID:" + call.sid + "</h1>");
+			res.end();
+		});
+	};
+	var twText = function(inputNum) {
+		res.writeHead(200, {
+			'Content-Type': 'text/html'
+		});
+		client.messages.create({
+			body: "This is Ling",
+			to: inputNum,
+			from: "+16504379899"
+		}, function(err, message) {
+			if (err) return console.error(err);
+			console.log(message.sid);
+			res.write("<h1>" + "Message Section ID:" + message.sid + "</h1>");
+			res.end();
+		});
+	}
+	if (req.url === "/bootstrap.css") {
+		myInput("bootstrap.css", "200", "text/css");
+	} else if (req.url === "/bootstrap.js") {
+		myInput("bootstrap.js", "200", "text/js");
+	} else if (req.url === "/body.html") {
+		myInput("body.html", "404", "text/html");
 	} else if (req.url === "/index.html") {
 		fs.readFile("Emailvalid.html", {
 			endocding: "utf8"
@@ -93,60 +137,10 @@ function requestHandler(req, res) {
 				});
 			});
 		});
-		//four functions in the else if loop, should have give functions names 
-	} else if (req.url === "/text") {
-			res.writeHead(200, {
-				'Content-Type': 'text/html'
-			});
-		client.messages.create({
-			body: "This is Ling",
-			to: "+14158126840",
-			from: "+16504379899"
-		}, function(err, message) {
-			if (err) return console.error(err);
-			console.log(message.sid);
-			res.write("<h1>"+ "Message Section ID:" + message.sid + "</h1>");
-			res.end();
-	});
 	} else if (req.url === "/call") {
-		res.writeHead(200, {
-			'Content-Type' : 'text/html'
-		});
-		client.calls.create({
-			to: "+4158126840",
-			from: "+16504379899",
-			url: "http://demo.twilio.com/docs/voice.xml",
-			applicationSid: "APa894ccc18916d5496c35bbe7bd7f07bc",
-			method: "GET",
-			fallbackMethod: "GET",
-			statusCallbackMethod: "GET",
-			record: "false"
-		}, function(err, call) {
-			if (err) return console.error(err);
-			console.log(call.sid);
-			res.write("<h1>"+ "Call Section ID:" + call.sid + "</h1>");
-			res.end();
-		});
-	} else if (req.url === "/bootstrap.js") {
-		fs.readFile("bootstrap.js", {
-			endcoding: "utf8"
-		}, function(err, data) {
-			res.writeHead(200, {
-				'Content-Type': 'text/js'
-			});
-			if (err) throw err;
-			res.write(data);
-			res.end();
-		});
-		//another read function
-	} else
-	if (req.url === "/panels.html") {
-		res.writeHead(404, {
-			'Content-Type': 'text/html'
-		});
-		res.write('<h1>404, webpage not found</h1>');
-		res.end();
-		//error page if request is undefine
+		twCall("+14158126840");
+	} else if (req.url === "/text") {
+		twText("+14158126840");
 	} else if (req.url === "/action") {
 		req.on('data', function(chunk) {
 			console.log("Received body data:");
@@ -182,18 +176,8 @@ function requestHandler(req, res) {
 				};
 			});
 		});
-		//function chunk , used req.on to passing back variables back to data base and saved in an array
 	} else {
-		fs.readFile("panels.html", {
-			encoding: "utf8"
-		}, function(err, data) {
-			res.writeHead(200, {
-				'Content-Type': 'text/html'
-			});
-			if (err) throw err;
-			res.write(data);
-			res.end();
-		});
+		myInput("panels.html", "200", "text/html");
 	}
 }
 http.createServer(requestHandler).listen(1337, '127.0.0.1');
