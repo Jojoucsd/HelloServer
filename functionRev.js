@@ -12,7 +12,8 @@ var keyIn ;
 var accountSid = 'AC6c6acb22cb0128a5612d62e81274db63';
 var authToken = '0943d5df024602eb9149009766b7c86f';
 var client = require('twilio')(accountSid, authToken);
-
+//var twCall = function (inputNum, next){};
+//var twText = function (inputNum, next){};
 mongoose.connect('mongodb://localhost/my_database');
 
 var lingSchema = new mongoose.Schema({
@@ -55,7 +56,7 @@ for (var j = 0; j < 10; j++) {
 console.log('finished');
 
 app.use (function(req, res, next) {
-	function myInput(file, code, option, next) {
+	/*function myInput(file, code, option, next) {
 		fs.readFile(file, {
 			encoding: "utf8"
 		}, function(err, data) {
@@ -72,8 +73,8 @@ app.use (function(req, res, next) {
 				res.end();
 			}
 		});
-	};
-	var twCall = function(inputNum) {
+	};*/
+	/*var twCall = function(inputNum) {
 		res.writeHead(200, {
 			'Content-Type': 'text/html'
 		});
@@ -107,17 +108,11 @@ app.use (function(req, res, next) {
 			res.write("<h1>" + "Message Section ID:" + message.sid + "</h1>");
 			res.end();
 		});
-	}
-	if (req.url === "/bootstrap.css") {
-		myInput("bootstrap.css", "200", "text/css");
-	} else if (req.url === "/bootstrap.js") {
-		myInput("bootstrap.js", "200", "text/js");
-	} else if (req.url === "/body.html") {
-		myInput("body.html", "404", "text/html");
-	} else if (req.url === "/index.html") {
+	};*/
+	if (req.url === "/index.html") {
 		myInput("Emailvalid.html", "200", "text/html", function(cb) {
 			console.log("hello");
-			fs.readFile("indexheader.html", {
+			fs.readFile("httpHeader.html", {
 				encoding: "utf8"
 			}, function(err, data) {
 				res.write('<h1>Email HomePage</h1>');
@@ -134,7 +129,7 @@ app.use (function(req, res, next) {
 							res.write("<h2>" + "Body: " + found[k].body + "</h2>");
 						}
 					};
-					fs.readFile("indexfooter.html", {
+					fs.readFile("httpFooter.html", {
 						encoding: "utf8"
 					}, function(err, data) {
 						res.write("<h1>Finished my email test</h1>");
@@ -165,7 +160,7 @@ app.use (function(req, res, next) {
 		});
 		req.on('end', function() {
 			debugger;
-			fs.readFile("indexheader.html", {
+			fs.readFile("httpHeader.html", {
 				encoding: 'utf8'
 			}, function(err, data) {
 				res.writeHead(200, "OK", {
@@ -195,15 +190,73 @@ app.use (function(req, res, next) {
 						res.end("<h1>Finish Ling Mail</h1>");
 					};
 				});
-						fs.readFile("indexfooter.html", {
+						fs.readFile("httpFooter.html", {
 						encoding: "utf8"
 					}, function(err, data) {
 						res.write("<h1>Finished my email test</h1>");
 					});
 			});
 		});
-	} else 
-		myInput("panels.html", "200", "text/html");
+	}  else {
+		next();
+	}
 })
+app.use(serveStatic("public", {'index': ['panels.html']}));
+app.use(function myInput(file, code, option, next) {
+		fs.readFile(file, {
+			encoding: "utf8"
+		}, function(err, data) {
+			res.writeHead(code, {
+				'Content-Type': option
+			});
+			if (err) throw err;
+			res.write(data);
+			if (next) {
+				next(function(err) {
+					if (err) throw err;
+				});
+			} else {
+				res.end();
+			}
+		});
+		next();
+	});
+app.use(function twCall(inputNum, next){
+	res.writeHead(200, {
+			'Content-Type': 'text/html'
+		});
+		client.calls.create({
+			to: inputNum,
+			from: "+16504379899",
+			url: "http://demo.twilio.com/docs/voice.xml",
+			applicationSid: "APa894ccc18916d5496c35bbe7bd7f07bc",
+			method: "GET",
+			fallbackMethod: "GET",
+			statusCallbackMethod: "GET",
+			record: "false"
+		}, function(err, call) {
+			if (err) return console.error(err);
+			console.log(call.sid);
+			res.write("<h1>" + "Call Section ID:" + call.sid + "</h1>");
+			res.end();
+		});
+		next();
+});
+app.use(function twText(inputNum, next){
+		res.writeHead(200, {
+			'Content-Type': 'text/html'
+		});
+		client.messages.create({
+			body: "This is Ling",
+			to: inputNum,
+			from: "+16504379899"
+		}, function(err, message) {
+			if (err) return console.error(err);
+			console.log(message.sid);
+			res.write("<h1>" + "Message Section ID:" + message.sid + "</h1>");
+			res.end();
+		}); 
+		next();
+});
 http.createServer(app).listen(1337, '127.0.0.1');
 console.log('Server running at http://127.0.0.1:1337/');
