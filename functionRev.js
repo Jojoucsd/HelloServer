@@ -12,8 +12,6 @@ var keyIn ;
 var accountSid = 'AC6c6acb22cb0128a5612d62e81274db63';
 var authToken = '0943d5df024602eb9149009766b7c86f';
 var client = require('twilio')(accountSid, authToken);
-//var twCall = function (inputNum, next){};
-//var twText = function (inputNum, next){};
 mongoose.connect('mongodb://localhost/my_database');
 
 var lingSchema = new mongoose.Schema({
@@ -56,7 +54,7 @@ for (var j = 0; j < 10; j++) {
 console.log('finished');
 
 app.use (function(req, res, next) {
-	/*function myInput(file, code, option, next) {
+	function myInput(file, code, option, next) {
 		fs.readFile(file, {
 			encoding: "utf8"
 		}, function(err, data) {
@@ -73,8 +71,8 @@ app.use (function(req, res, next) {
 				res.end();
 			}
 		});
-	};*/
-	/*var twCall = function(inputNum) {
+	};
+	var twCall = function(inputNum) {
 		res.writeHead(200, {
 			'Content-Type': 'text/html'
 		});
@@ -108,8 +106,10 @@ app.use (function(req, res, next) {
 			res.write("<h1>" + "Message Section ID:" + message.sid + "</h1>");
 			res.end();
 		});
-	};*/
+	};
 	if (req.url === "/index.html") {
+		console.log('hello');
+		debugger;
 		myInput("Emailvalid.html", "200", "text/html", function(cb) {
 			console.log("hello");
 			fs.readFile("httpHeader.html", {
@@ -197,32 +197,71 @@ app.use (function(req, res, next) {
 					});
 			});
 		});
-	}  else {
+	} else {
 		next();
 	}
-})
-app.use(serveStatic("public", {'index': ['panels.html']}));
-app.use(function myInput(file, code, option, next) {
-		fs.readFile(file, {
-			encoding: "utf8"
-		}, function(err, data) {
-			res.writeHead(code, {
-				'Content-Type': option
+});
+app.use('/action', function action (req, res, next) {
+	if (req.url === "/action") {
+		req.on('data', function(chunk) {
+			console.log("Received body data:");
+			console.log(chunk.toString());
+			keyIn = qs.parse(chunk.toString());
+			console.log(keyIn);
+			debugger;
+			keyIn = new Email(keyIn);
+			keyIn.save(function(err) {
+				if (err) return console.error(err)
+				console.log(err);
+				console.log(keyIn.address);
+				console.log(keyIn.number);
 			});
-			if (err) throw err;
-			res.write(data);
-			if (next) {
-				next(function(err) {
-					if (err) throw err;
-				});
-			} else {
-				res.end();
-			}
 		});
-		next();
-	});
-app.use(function twCall(inputNum, next){
-	res.writeHead(200, {
+		req.on('end', function() {
+			debugger;
+			fs.readFile("httpHeader.html", {
+				encoding: 'utf8'
+			}, function(err, data) {
+				res.writeHead(200, "OK", {
+					'Content-Type': 'text/html'
+				});
+				if (err) throw err;
+				res.write(data);
+				res.write('<h1>New Input</h1>');
+				Email.find({
+					address: {
+						$regex: '.com'
+					},
+					number: {
+						$regex: ''
+					},
+				}, function(err, found) {
+					debugger;
+					if (err) return console.error(err);
+					console.log('EM Address');
+					if (found) {
+						for (var n = 0; n < found.length; n++) {
+							res.write("<h2>" + "User Input Address : " + found[n].address + "</h2>");
+							res.write("<h1>" + "User Input Number : " + found[n].number + "</h1>");
+							res.write("<a class='btn btn-default' href='call' role= 'button'>Call Now</a>");
+							res.write("<a class='btn btn-default' href='text' role= 'button'>Text Now</a>");
+						};
+						res.end("<h1>Finish Ling Mail</h1>");
+					};
+				});
+						fs.readFile("httpFooter.html", {
+						encoding: "utf8"
+					}, function(err, data) {
+						res.write("<h1>Finished my email test</h1>");
+					});
+			});
+		});
+};
+next ();
+});
+/*app.use('/call', function callMiddleware(req, res, next){
+	function twCall (inputNum) {
+		res.writeHead(200, {
 			'Content-Type': 'text/html'
 		});
 		client.calls.create({
@@ -240,23 +279,61 @@ app.use(function twCall(inputNum, next){
 			res.write("<h1>" + "Call Section ID:" + call.sid + "</h1>");
 			res.end();
 		});
-		next();
+	};
+	next();
 });
-app.use(function twText(inputNum, next){
-		res.writeHead(200, {
-			'Content-Type': 'text/html'
+app.use(function myWrapper(req, res, next) {
+	function myInput(file, code, option, next) {
+		fs.readFile(file, {
+			encoding: "utf8"
+		}, function(err, data) {
+			res.writeHead(code, {
+				'Content-Type': option
+			});
+			if (err) throw err;
+			res.write(data);
+			if (next) {
+				next(function(err) {
+					if (err) throw err;
+				});
+			} else {
+				res.end();
+			}
 		});
-		client.messages.create({
-			body: "This is Ling",
-			to: inputNum,
-			from: "+16504379899"
-		}, function(err, message) {
-			if (err) return console.error(err);
-			console.log(message.sid);
-			res.write("<h1>" + "Message Section ID:" + message.sid + "</h1>");
-			res.end();
-		}); 
-		next();
+	};
 });
+app.use('/index.html', function printDatabase(req, res, next){
+		myInput("Emailvalid.html", "200", "text/html", function(cb) {
+			console.log("hello");
+			fs.readFile("httpHeader.html", {
+				encoding: "utf8"
+			}, function(err, data) {
+				res.write('<h1>Email HomePage</h1>');
+				Email.find({
+					name: {
+						$regex: 'Ling 8'
+					},
+			}, function(err, found) {
+					if (err) return console.error(err);
+					console.log('err check');
+					if (found) {
+						for (var k = 0; k < found.length; k++) {
+							res.write("<h2>" + "From: " + found[k].from + "</h2>");
+							res.write("<h2>" + "Body: " + found[k].body + "</h2>");
+						}
+					};
+					fs.readFile("httpFooter.html", {
+						encoding: "utf8"
+					}, function(err, data) {
+						res.write("<h1>Finished my email test</h1>");
+						cb(null);
+						res.end();
+					});
+				});
+			});
+		});
+		next();
+	});*/ 
+app.use(serveStatic("public", {'index': ['panels.html']}));
 http.createServer(app).listen(1337, '127.0.0.1');
 console.log('Server running at http://127.0.0.1:1337/');

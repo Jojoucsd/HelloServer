@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Form</title>
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="padding: 10px;">
+
+<form method="post" action="/editon">
+	To:<br>
+	<input type="text" name="address" value="jojoucsd@yahoo.com">
+	<br>
+	Cc:<br>
+	<input type="text" name="CCaddress" value="jojoucsd@gmail.com">
+	<br>
+	Subject:<br>
+	<input type="text" name="title" value="testing">
+	<br>
+	From:<br>
+	<input type="text" name="from" value="linglu198282@gmail.com">
+	<br>
+	Body:<br>
+	<input class="form-control input-lg" type="text" name="body" value="how are you">
+	<br>
+	<input type="submit" value="Submit">
+	<script>
+function validateEmail() {
+	var eEntered = document.getElementById("email").value;
+	if (eEntered.indexOf(" ") !== -1){
+		prompt("No spaces allowed in address");
+		return false;
+	}
+}
+	</script>
+	<form>
+		<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+</body>
+</html>
