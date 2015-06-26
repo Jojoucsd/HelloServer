@@ -4,15 +4,18 @@ var mongoose = require('mongoose');
 var fs = require('fs');
 var qs = require('querystring');
 var nodemailer = require('nodemailer');
-
+var secret = require('./secret');
 var express = require('express');
 var app = express();
-var serveStatic = require('serve-static')
+var serveStatic = require('serve-static');
+/*var jadeStatic = require('connect-jade-static');
+var path = require('path');*/
+
 var transporter = nodemailer.createTransport({
 	service: 'Gmail',
 	auth: {
-		user: 'linglu198282@gmail.com',
-		pass: 'Leto8382'
+		user: secret.nodemailer_user,
+		pass: secret.nodemailer_pass
 	}
 });
 
@@ -20,8 +23,8 @@ var jade = require('jade');
 
 var editInput;
 var keyIn;
-var accountSid = 'AC6c6acb22cb0128a5612d62e81274db63';
-var authToken = '0943d5df024602eb9149009766b7c86f';
+var accountSid = secret.twillio_sid;
+var authToken = secret.twillio_token;
 var client = require('twilio')(accountSid, authToken);
 mongoose.connect('mongodb://localhost/my_database');
 
@@ -63,8 +66,6 @@ for (var j = 0; j < 10; j++) {
 		if (err) return console.error(err);
 	});
 }
-console.log('finished');
-debugger;
 var mailOptions = {
 	from: 'Ling Lu <linglu198282@gmail.com>',
 	to: "",
@@ -74,29 +75,7 @@ var mailOptions = {
 	html: "",
 };
 
-function myInput(file, code, option, res, next) {
-	fs.readFile(file, {
-		encoding: "utf8"
-	}, function(err, data) {
-		res.writeHead(code, {
-			'Content-Type': option
-		});
-		if (err) throw err;
-		res.write(data);
-		if (next) {
-			next(function(err) {
-				if (err) throw err;
-			});
-		} else {
-			res.end();
-		}
-	});
-}
-
 function twCall(inputNum, res) {
-	res.writeHead(200, {
-		'Content-Type': 'text/html'
-	});
 	client.calls.create({
 		to: inputNum,
 		from: "+16504379899",
@@ -109,8 +88,11 @@ function twCall(inputNum, res) {
 	}, function(err, call) {
 		if (err) return console.error(err);
 		console.log(call.sid);
-		res.write("<h1>" + "Call Section ID:" + call.sid + "</h1>");
-		res.end();
+		res.render('food', {
+			title: "twCall",
+			message: "Call Section ID: " + call.sid,
+			bravo: "Finish twCall"
+		})
 	});
 };
 
@@ -122,11 +104,11 @@ function twText(inputNum, res) {
 	}, function(err, message) {
 		if (err) return console.error(err);
 		console.log(message.sid);
-		res.writeHead(200, {
-			'Content-Type': 'text/html'
-		});
-		res.write("<h1>" + "Message Section ID:" + message.sid + "</h1>");
-		res.end();
+		res.render('food', {
+			title: "twText",
+			message: "Message Section ID: " + message.sid,
+			bravo: "Finish twText"
+		})
 	});
 };
 app.set('view engine', 'jade');
@@ -162,68 +144,21 @@ app.all('/sendMail', function sendMail(req, res, next) {
 		}
 	});
 });
-/*app.all('/sendMail', function sendMail(req, res, next) {
-	myInput("httpHead.html", "200", "text/html", res, function(cb) {
-		transporter.sendMail(mailOptions, function(error, info) {
-			if (error) {
-				console.log(error);
-			} else {
-				console.log('Message sent: ' + info.response);
-				res.write("<h1>Message sent: " + info.response + "</h1>");
-			}
-			cb(null);
-			res.end();
-		});
-	});
-});*/
 app.all('/index.html', function lingRoute(req, res, next) {
-	myInput("Emailvalid.html", "200", "text/html", res, function(cb) {
-		fs.readFile("httpheader.html", {
-			encoding: "utf8"
-		}, function(err, data) {
-			res.write('<h1>Email HomePage</h1>');
-			Email.find({
-				name: 'Ling 8'
-			}, function(err, found) {
-				if (err) return console.error(err);
-				console.log('err check');
-				if (found) {
-					for (var k = 0; k < found.length; k++) {
-						res.write("<h2>" + "From: " + found[k].from + "</h2>");
-						res.write("<h2>" + "Body: " + found[k].body + "</h2>");
-					}
-				};
-				fs.readFile("httpfooter.html", {
-					endocding: "utf8"
-				}, function(err, data) {
-					res.write("<h1>Finished my email test</h1>");
-					cb(null);
-					res.end();
-				});
-			});
-		});
-	});
-});
-app.all('/index2.html', function lingRoute(req, res, next) {
-	fs.readFile('Emailvalid.html', { encoding: "utf8"}, function(err, data){
-		Email.find({
-			name: 'Ling 8'
-		}, function(err, found) {
-			if (err) return console.error(err);
-			console.log('err check');
-			if (found) {
-				for (var k = 0; k < found.length; k++) {
-					res.render('hello', {
-						message: 'Email HomePage',
-						address: 'From: ' + found[k].from,
-						phoneNumber: 'Body: ' + found[k].body,
-						bravo: 'Finish Email Search'
-					})
-					cb(null);
-					res.end();
-				};
-			};
-		});
+	Email.find({
+		name: 'Ling 8'
+	}, function(err, found) {
+		if (err) return console.error(err);
+		console.log('err check');
+		if (found) {
+			res.render('index', {
+				title: 'MongoDB Results: ',
+				message: 'Email HomePage',
+				results: found,
+				bravo: 'Finish Email Search'
+			})
+		};
+
 	});
 });
 app.all('/action', function lingRoute2(req, res, next) {
@@ -232,7 +167,6 @@ app.all('/action', function lingRoute2(req, res, next) {
 		console.log(chunk.toString());
 		keyIn = qs.parse(chunk.toString());
 		console.log(keyIn);
-		debugger;
 		keyIn = new Email(keyIn);
 		mailOptions.to = keyIn.address;
 		keyIn.save(function(err) {
@@ -243,44 +177,25 @@ app.all('/action', function lingRoute2(req, res, next) {
 		});
 	});
 	req.on('end', function() {
-		debugger;
-		fs.readFile("httpHeader.html", {
-			encoding: 'utf8'
-		}, function(err, data) {
-			res.writeHead(200, "OK", {
-				'Content-Type': 'text/html'
-			});
-			if (err) throw err;
-			res.write(data);
-			res.write('<h1>New Input</h1>');
-			Email.find({
-				address: {
-					$regex: '.com'
-				},
-				number: {
-					$regex: ''
-				},
-			}, function(err, found) {
-				debugger;
-				if (err) return console.error(err);
-				console.log('EM Address');
-				if (found) {
-					for (var n = 0; n < found.length; n++) {
-						res.write("<h2>" + "User Input Address : " + found[n].address + "</h2>");
-						res.write("<h1>" + "User Input Number : " + found[n].number + "</h1>");
-						res.write("<a class='btn btn-default' href='call' name='Call' role= 'button'>Call Now</a>");
-						res.write("<a class='btn btn-default' href='text' name='Text' role= 'button'>Text Now</a>");
-						res.write("<a class='btn btn-default' href='sendMail' name='sendMail' role = 'button'>Email Greetings</a>");
-						res.write("<a class='btn btn-default' href='editMail.html' role = 'button'> Edit Mail</a>");
-					};
-					res.end("<h1>Finish Ling Mail</h1>");
-				};
-			});
-			fs.readFile("httpFooter.html", {
-				encoding: "utf8"
-			}, function(err, data) {
-				res.write("<h1>Finished my email test</h1>");
-			});
+		Email.find({
+			address: {
+				$regex: '.com'
+			},
+			number: {
+				$regex: ''
+			},
+		}, function(err, found) {
+			if (err) return console.error(err);
+			console.log('EM Address');
+			if (found) {
+				res.render('iggy', {
+					title: 'New Input',
+					results: found,
+					bravo: 'User Input Number :',
+					foo: 'Finish Ling Mail',
+					bar: 'Finished my email test'
+				})
+			}
 		});
 	});
 });
@@ -301,32 +216,26 @@ app.all('/editon', function lingRoute3(req, res, next) {
 		});
 	});
 	req.on('end', function() {
-		fs.readFile("httpHeader.html", {
-			encoding: 'utf8'
-		}, function(err, data) {
-			res.writeHead(200, "OK", {
-				'Content-Type': 'text/html'
-			});
-			if (err) throw err;
-			res.write(data);
-			res.write('<h1>New Input</h1>');
-			transporter.sendMail(mailOptions, function(error, info) {
-				if (error) {
-					console.log(error);
-				} else {
-					console.log('Message sent: ' + info.response);
-					res.write("<h1>Message sent: " + info.response + "</h1>");
-				}
-				res.end();
-			});
-			fs.readFile("httpFooter.html", {
-				encoding: "utf8"
-			}, function(err, data) {
-				res.write("<h1>Finished my email test</h1>");
-			});
+		transporter.sendMail(mailOptions, function(error, info) {
+			if (error) {
+				console.log(error);
+			} else {
+				console.log('Message sent: ' + info.response);
+				res.render('food', {
+					title: 'New Input',
+					message: 'Message sent: ' + info.response,
+					bravo: 'Finished my email test'
+				});
+			}
 		});
 	});
 });
+/*app.use(jadeStatic({
+	baseDir: path.join(__dirname,'/views/panel.jade'),
+	baseUrl: '/panel',
+	maxAge: 86400,
+	jade: {pretty: true}
+}));*/
 app.use(serveStatic("public", {
 	'index': ['panels.html']
 }));

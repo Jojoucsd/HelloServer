@@ -1,0 +1,34 @@
+html
+  head
+    meta(charset="utf-8")
+    title Results
+    link(href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css",rel="stylesheet")
+
+  body
+    h1= title
+        
+    h1= message
+    h1= bravo
+    ul
+     each result in results
+       li= result.address 
+         p= result.number
+
+         a(class='btn btn-default',id='call',href='/call',name='Call').
+             Call Now 
+         a(class='btn btn-default',id='text',href='/text',name='Text',role='button').
+             Text Now
+         a(class='btn btn-default',id='send',href='/sendMail',name='sendMail',role ='button').
+             Email Greetings
+         a(class='btn btn-default',id='edit',href='/editMail.html',name='editMail',role ='button').
+             Edit Mail
+            
+
+    h1= foo
+    h1= bar
+    h1= cnt
+    h1= dog
+    h1= egg
+    h1= fuk
+    h1= goo
+    script(src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js")

@@ -9,8 +9,8 @@ var app = connect();
 var serveStatic = require('serve-static');
 
 var keyIn ;
-var accountSid = 'AC6c6acb22cb0128a5612d62e81274db63';
-var authToken = '0943d5df024602eb9149009766b7c86f';
+var accountSid = '';
+var authToken = '';
 var client = require('twilio')(accountSid, authToken);
 mongoose.connect('mongodb://localhost/my_database');
 

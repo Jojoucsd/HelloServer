@@ -1,0 +1,42 @@
+doctype html(lang='en')
+head
+  meta(charset='utf-8')
+    |   
+    title Panels
+    link(href='//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css', rel='stylesheet')
+  body(style='padding: 10px;')
+    .panel.panel-primary
+      .panel-heading Heading
+      |     
+      .list-group.list-group-flush
+        li.list-group-item.list-group-item-success
+          .pull-right
+            span.glyphicon.glyphicon-chevron-right
+          |         
+          span.badge 4
+          |         
+          h4.list-group-item-heading
+            | Index
+            .pull-right
+              span.glyphicon.glyphicon-search(aria-hidden='true')
+          |         
+          p.list-group-item-text My first web page build upon from Javascript and bootstrap 
+        |       
+        a#css.list-group-item.list-group-item-info(href='bootstrap.css') Bootstrap.css
+        |       
+        a#js.list-group-item.list-group-item-warning(href='bootstrap.js') Bootstrap.js
+        |       
+        a#EmDB.list-group-item.active(href='index.html')
+          span.badge 8
+          |         
+          h4.list-group-item-heading EmailDB
+          |         
+          p.list-group-item-text Email database result from MongoDB and simple email web page
+        |       
+        a#404.list-group-item.list-group-item-danger(href='body.html') 404 error page
+      |      
+      |      
+      |      
+      .panel-footer Footer
+    script(src='//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js')
+

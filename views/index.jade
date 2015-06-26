@@ -1,0 +1,21 @@
+head
+  title Form
+  link(href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css",rel="stylesheet")
+
+body
+  h1= title
+  p Welcome to #{title}
+
+  form(method="post", action="/action")
+    | Email Address:
+    input(type="text",id="address",name="address",value="jojoucsd@gmail.com")
+    | Phone Number:
+    input(type="text",id="number",name="number", value="4158126840")
+    input(type="submit", id="submit", value="Submit")
+  ul
+   each result in results
+     li= result.from 
+       p= result.body 
+
+  h1= bravo
+  script(src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js")
